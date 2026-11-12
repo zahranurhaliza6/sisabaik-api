@@ -5,11 +5,13 @@ const penawaranId = Number(process.argv[3] ?? 1);
 const kuantitas = Number(process.argv[4] ?? 1);
 
 if (!Number.isInteger(penawaranId) || !Number.isInteger(kuantitas) || kuantitas < 1) {
-  console.error("penawaranId dan kuantitas harus berupa bilangan bulat positif.");
+
+console.error("penawaranId dan kuantitas harus berupa bilangan bulat positif.");
   process.exitCode = 1;
 } else {
   let client;
   let transaksiDimulai = false;
+
   try {
     client = await pool.connect();
     await client.query("BEGIN");
@@ -22,7 +24,8 @@ if (!Number.isInteger(penawaranId) || !Number.isInteger(kuantitas) || kuantitas 
     if (pembeli.rowCount !== 1) throw new Error("Pembeli tidak ditemukan.");
 
     const penawaran = await client.query(
-      `SELECT id, penyedia_id, nama, harga_normal, harga_penawaran, stok, status, berakhir_pada
+      `SELECT id, penyedia_id, nama, harga_normal, harga_penawaran,
+              stok, status, berakhir_pada
        FROM penawaran
        WHERE id = $1
        FOR UPDATE`,
@@ -46,10 +49,11 @@ if (!Number.isInteger(penawaranId) || !Number.isInteger(kuantitas) || kuantitas 
 
     await client.query(
       `INSERT INTO detail_pesanan (
-        pesanan_id, penawaran_id, penyedia_id, kuantitas,
-        harga_normal_satuan, harga_penawaran_satuan
+         pesanan_id, penawaran_id, penyedia_id, kuantitas,
+         harga_normal_satuan, harga_penawaran_satuan
        ) VALUES ($1, $2, $3, $4, $5, $6)`,
-      [pesananId, item.id, item.penyedia_id, kuantitas, item.harga_normal, item.harga_penawaran]
+      [pesananId, item.id, item.penyedia_id, kuantitas,
+       item.harga_normal, item.harga_penawaran]
     );
 
     await client.query(
@@ -81,7 +85,8 @@ if (!Number.isInteger(penawaranId) || !Number.isInteger(kuantitas) || kuantitas 
       });
     }
     console.error("Pesanan dibatalkan:", error.message);
-    process.exitCode = 1;
+
+process.exitCode = 1;
   } finally {
     client?.release();
     await pool.end();
